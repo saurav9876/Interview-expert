@@ -25,6 +25,38 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280; /* gray-500 */
         }
+        .filter-select {
+            background-color: #374151; /* gray-700 */
+            color: #e5e7eb; /* gray-200 */
+            border: 1px solid #4b5563; /* gray-600 */
+        }
+        .custom-checkbox {
+            appearance: none;
+            background-color: #374151; /* gray-700 */
+            border: 1px solid #6b7280; /* gray-500 */
+            padding: 8px; /* Makes it easier to tap */
+            border-radius: 4px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            margin-right: 10px; /* Spacing between checkbox and text */
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+            width: 20px;
+            height: 20px;
+        }
+        .custom-checkbox:checked {
+            background-color: #2563eb; /* blue-600 */
+            border-color: #2563eb;
+        }
+        .custom-checkbox:checked::after {
+            content: '✔';
+            font-size: 14px;
+            color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 antialiased">
@@ -35,6 +67,18 @@
             <p class="text-md sm:text-lg text-gray-400 mt-2">Your curated guide to ace technical interviews.</p>
         </div>
     </header>
+
+    <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex flex-col sm:flex-row justify-start items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <label for="category-filter" class="text-gray-300 font-medium">Filter by Category:</label>
+            <select id="category-filter" class="filter-select p-2 rounded-md shadow">
+                <option value="All">All Categories</option>
+                </select>
+             <button id="clear-progress-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow transition duration-150 ease-in-out">
+                Clear All Progress
+            </button>
+        </div>
+    </section>
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -74,144 +118,204 @@
     </footer>
 
     <script>
-        // JavaScript to populate questions and update counts
-
+        // --- DATA ---
         const questions = [
             // Easy
-            { name: "Two Sum", link: "https://leetcode.com/problems/two-sum/", difficulty: "Easy" },
-            { name: "Reverse String", link: "https://leetcode.com/problems/reverse-string/", difficulty: "Easy" },
-            { name: "Valid Parentheses", link: "https://leetcode.com/problems/valid-parentheses/", difficulty: "Easy" },
-            { name: "Merge Two Sorted Lists", link: "https://leetcode.com/problems/merge-two-sorted-lists/", difficulty: "Easy" },
-            { name: "Best Time to Buy and Sell Stock", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/", difficulty: "Easy" },
-            { name: "Valid Palindrome", link: "https://leetcode.com/problems/valid-palindrome/", difficulty: "Easy" },
-            { name: "Invert Binary Tree", link: "https://leetcode.com/problems/invert-binary-tree/", difficulty: "Easy" },
-            { name: "Valid Anagram", link: "https://leetcode.com/problems/valid-anagram/", difficulty: "Easy" },
-            { name: "Binary Search", link: "https://leetcode.com/problems/binary-search/", difficulty: "Easy" },
-            { name: "Maximum Depth of Binary Tree", link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/", difficulty: "Easy" },
-            { name: "Contains Duplicate", link: "https://leetcode.com/problems/contains-duplicate/", difficulty: "Easy" },
-            { name: "Linked List Cycle", link: "https://leetcode.com/problems/linked-list-cycle/", difficulty: "Easy" },
-            { name: "Climbing Stairs", link: "https://leetcode.com/problems/climbing-stairs/", difficulty: "Easy" },
-            { name: "Missing Number", link: "https://leetcode.com/problems/missing-number/", difficulty: "Easy" },
-            { name: "Majority Element", link: "https://leetcode.com/problems/majority-element/", difficulty: "Easy" },
-            { name: "Move Zeroes", link: "https://leetcode.com/problems/move-zeroes/", difficulty: "Easy" },
-            { name: "Symmetric Tree", link: "https://leetcode.com/problems/symmetric-tree/", difficulty: "Easy" },
-            { name: "Palindrome Linked List", link: "https://leetcode.com/problems/palindrome-linked-list/", difficulty: "Easy" },
-            { name: "Lowest Common Ancestor of a BST", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", difficulty: "Easy" },
-            { name: "First Bad Version", link: "https://leetcode.com/problems/first-bad-version/", difficulty: "Easy" },
-            { name: "Ransom Note", link: "https://leetcode.com/problems/ransom-note/", difficulty: "Easy" },
-            { name: "Implement Queue using Stacks", link: "https://leetcode.com/problems/implement-queue-using-stacks/", difficulty: "Easy" },
-            { name: "Implement Stack using Queues", link: "https://leetcode.com/problems/implement-stack-using-queues/", difficulty: "Easy" },
-            { name: "Diameter of Binary Tree", link: "https://leetcode.com/problems/diameter-of-binary-tree/", difficulty: "Easy" },
-            { name: "Middle of the Linked List", link: "https://leetcode.com/problems/middle-of-the-linked-list/", difficulty: "Easy" },
+            { id: "two-sum", name: "Two Sum", link: "https://leetcode.com/problems/two-sum/", difficulty: "Easy", category: "Arrays" },
+            { id: "reverse-string", name: "Reverse String", link: "https://leetcode.com/problems/reverse-string/", difficulty: "Easy", category: "Strings" },
+            { id: "valid-parentheses", name: "Valid Parentheses", link: "https://leetcode.com/problems/valid-parentheses/", difficulty: "Easy", category: "Stack" },
+            { id: "merge-two-sorted-lists", name: "Merge Two Sorted Lists", link: "https://leetcode.com/problems/merge-two-sorted-lists/", difficulty: "Easy", category: "Linked List" },
+            { id: "best-time-to-buy-and-sell-stock", name: "Best Time to Buy and Sell Stock", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/", difficulty: "Easy", category: "Arrays" },
+            { id: "valid-palindrome", name: "Valid Palindrome", link: "https://leetcode.com/problems/valid-palindrome/", difficulty: "Easy", category: "Strings" },
+            { id: "invert-binary-tree", name: "Invert Binary Tree", link: "https://leetcode.com/problems/invert-binary-tree/", difficulty: "Easy", category: "Trees" },
+            { id: "valid-anagram", name: "Valid Anagram", link: "https://leetcode.com/problems/valid-anagram/", difficulty: "Easy", category: "Strings" }, // Hash Table also applicable
+            { id: "binary-search", name: "Binary Search", link: "https://leetcode.com/problems/binary-search/", difficulty: "Easy", category: "Searching" },
+            { id: "maximum-depth-of-binary-tree", name: "Maximum Depth of Binary Tree", link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/", difficulty: "Easy", category: "Trees" },
+            { id: "contains-duplicate", name: "Contains Duplicate", link: "https://leetcode.com/problems/contains-duplicate/", difficulty: "Easy", category: "Arrays" }, // Hash Table
+            { id: "linked-list-cycle", name: "Linked List Cycle", link: "https://leetcode.com/problems/linked-list-cycle/", difficulty: "Easy", category: "Linked List" },
+            { id: "climbing-stairs", name: "Climbing Stairs", link: "https://leetcode.com/problems/climbing-stairs/", difficulty: "Easy", category: "DP" },
+            { id: "missing-number", name: "Missing Number", link: "https://leetcode.com/problems/missing-number/", difficulty: "Easy", category: "Arrays" }, // Bit Manipulation, Math
+            { id: "majority-element", name: "Majority Element", link: "https://leetcode.com/problems/majority-element/", difficulty: "Easy", category: "Arrays" }, // Sorting, Hash Table
+            { id: "move-zeroes", name: "Move Zeroes", link: "https://leetcode.com/problems/move-zeroes/", difficulty: "Easy", category: "Arrays" }, // Two Pointers
+            { id: "symmetric-tree", name: "Symmetric Tree", link: "https://leetcode.com/problems/symmetric-tree/", difficulty: "Easy", category: "Trees" },
+            { id: "palindrome-linked-list", name: "Palindrome Linked List", link: "https://leetcode.com/problems/palindrome-linked-list/", difficulty: "Easy", category: "Linked List" },
+            { id: "lowest-common-ancestor-of-a-bst", name: "Lowest Common Ancestor of a BST", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", difficulty: "Easy", category: "Trees" },
+            { id: "first-bad-version", name: "First Bad Version", link: "https://leetcode.com/problems/first-bad-version/", difficulty: "Easy", category: "Searching" }, // Binary Search
+            { id: "ransom-note", name: "Ransom Note", link: "https://leetcode.com/problems/ransom-note/", difficulty: "Easy", category: "Strings" }, // Hash Table
+            { id: "implement-queue-using-stacks", name: "Implement Queue using Stacks", link: "https://leetcode.com/problems/implement-queue-using-stacks/", difficulty: "Easy", category: "Stack" }, // Queue, Design
+            { id: "implement-stack-using-queues", name: "Implement Stack using Queues", link: "https://leetcode.com/problems/implement-stack-using-queues/", difficulty: "Easy", category: "Queue" }, // Stack, Design
+            { id: "diameter-of-binary-tree", name: "Diameter of Binary Tree", link: "https://leetcode.com/problems/diameter-of-binary-tree/", difficulty: "Easy", category: "Trees" },
+            { id: "middle-of-the-linked-list", name: "Middle of the Linked List", link: "https://leetcode.com/problems/middle-of-the-linked-list/", difficulty: "Easy", category: "Linked List" },
 
             // Medium
-            { name: "3Sum", link: "https://leetcode.com/problems/3sum/", difficulty: "Medium" },
-            { name: "Container With Most Water", link: "https://leetcode.com/problems/container-with-most-water/", difficulty: "Medium" },
-            { name: "Letter Combinations of a Phone Number", link: "https://leetcode.com/problems/letter-combinations-of-a-phone-number/", difficulty: "Medium" },
-            { name: "Remove Nth Node From End of List", link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/", difficulty: "Medium" },
-            { name: "Generate Parentheses", link: "https://leetcode.com/problems/generate-parentheses/", difficulty: "Medium" },
-            { name: "Group Anagrams", link: "https://leetcode.com/problems/group-anagrams/", difficulty: "Medium" },
-            { name: "Rotate Image", link: "https://leetcode.com/problems/rotate-image/", difficulty: "Medium" },
-            { name: "Jump Game", link: "https://leetcode.com/problems/jump-game/", difficulty: "Medium" },
-            { name: "Merge Intervals", link: "https://leetcode.com/problems/merge-intervals/", difficulty: "Medium" },
-            { name: "Unique Paths", link: "https://leetcode.com/problems/unique-paths/", difficulty: "Medium" },
-            { name: "Set Matrix Zeroes", link: "https://leetcode.com/problems/set-matrix-zeroes/", difficulty: "Medium" },
-            { name: "Search in Rotated Sorted Array", link: "https://leetcode.com/problems/search-in-rotated-sorted-array/", difficulty: "Medium" },
-            { name: "Combination Sum", link: "https://leetcode.com/problems/combination-sum/", difficulty: "Medium" },
-            { name: "Permutations", link: "https://leetcode.com/problems/permutations/", difficulty: "Medium" },
-            { name: "Kth Smallest Element in a BST", link: "https://leetcode.com/problems/kth-smallest-element-in-a-bst/", difficulty: "Medium" },
-            { name: "Binary Tree Level Order Traversal", link: "https://leetcode.com/problems/binary-tree-level-order-traversal/", difficulty: "Medium" },
-            { name: "Validate Binary Search Tree", link: "https://leetcode.com/problems/validate-binary-search-tree/", difficulty: "Medium" },
-            { name: "Number of Islands", link: "https://leetcode.com/problems/number-of-islands/", difficulty: "Medium" },
-            { name: "Product of Array Except Self", link: "https://leetcode.com/problems/product-of-array-except-self/", difficulty: "Medium" },
-            { name: "Course Schedule", link: "https://leetcode.com/problems/course-schedule/", difficulty: "Medium" },
-            { name: "Implement Trie (Prefix Tree)", link: "https://leetcode.com/problems/implement-trie-prefix-tree/", difficulty: "Medium" },
-            { name: "Coin Change", link: "https://leetcode.com/problems/coin-change/", difficulty: "Medium" },
-            { name: "Longest Increasing Subsequence", link: "https://leetcode.com/problems/longest-increasing-subsequence/", difficulty: "Medium" },
-            { name: "Top K Frequent Elements", link: "https://leetcode.com/problems/top-k-frequent-elements/", difficulty: "Medium" },
-            { name: "Find the Duplicate Number", link: "https://leetcode.com/problems/find-the-duplicate-number/", difficulty: "Medium" },
-            { name: "Longest Substring Without Repeating Characters", link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "Medium" },
-            { name: "Sort Colors", link: "https://leetcode.com/problems/sort-colors/", difficulty: "Medium" },
-            { name: "Word Break", link: "https://leetcode.com/problems/word-break/", difficulty: "Medium" },
-            { name: "Decode Ways", link: "https://leetcode.com/problems/decode-ways/", difficulty: "Medium" },
-            { name: "Construct Binary Tree from Preorder and Inorder Traversal", link: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/", difficulty: "Medium" },
-            { name: "Lowest Common Ancestor of a Binary Tree", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/", difficulty: "Medium" },
-            { name: "Rotting Oranges", link: "https://leetcode.com/problems/rotting-oranges/", difficulty: "Medium" },
-            { name: "Search a 2D Matrix", link: "https://leetcode.com/problems/search-a-2d-matrix/", difficulty: "Medium" },
-            { name: "K Closest Points to Origin", link: "https://leetcode.com/problems/k-closest-points-to-origin/", difficulty: "Medium" },
-            { name: "Time Based Key-Value Store", link: "https://leetcode.com/problems/time-based-key-value-store/", difficulty: "Medium" },
-            { name: "Accounts Merge", link: "https://leetcode.com/problems/accounts-merge/", difficulty: "Medium" },
-            { name: "Spiral Matrix", link: "https://leetcode.com/problems/spiral-matrix/", difficulty: "Medium" },
-            { name: "Subsets", link: "https://leetcode.com/problems/subsets/", difficulty: "Medium" },
-            { name: "Binary Tree Right Side View", link: "https://leetcode.com/problems/binary-tree-right-side-view/", difficulty: "Medium" },
-            { name: "Longest Palindromic Substring", link: "https://leetcode.com/problems/longest-palindromic-substring/", difficulty: "Medium" },
-            { name: "Daily Temperatures", link: "https://leetcode.com/problems/daily-temperatures/", difficulty: "Medium" },
-            { name: "Meeting Rooms II", link: "https://leetcode.com/problems/meeting-rooms-ii/", difficulty: "Medium" }, // Premium
-            { name: "Serialize and Deserialize Binary Tree", link: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", difficulty: "Medium" }, // Often considered Hard
-            { name: "Insert Interval", link: "https://leetcode.com/problems/insert-interval/", difficulty: "Medium" },
-            { name: "Clone Graph", link: "https://leetcode.com/problems/clone-graph/", difficulty: "Medium" },
-            { name: "Pacific Atlantic Water Flow", link: "https://leetcode.com/problems/pacific-atlantic-water-flow/", difficulty: "Medium" },
-            { name: "Graph Valid Tree", link: "https://leetcode.com/problems/graph-valid-tree/", difficulty: "Medium" }, // Premium
-            { name: "Number of Connected Components in an Undirected Graph", link: "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/", difficulty: "Medium" }, // Premium
-            { name: "Encode and Decode Strings", link: "https://leetcode.com/problems/encode-and-decode-strings/", difficulty: "Medium" }, // Premium
-            { name: "Minimum Knight Moves", link: "https://leetcode.com/problems/minimum-knight-moves/", difficulty: "Medium" },
+            { id: "3sum", name: "3Sum", link: "https://leetcode.com/problems/3sum/", difficulty: "Medium", category: "Arrays" }, // Two Pointers
+            { id: "container-with-most-water", name: "Container With Most Water", link: "https://leetcode.com/problems/container-with-most-water/", difficulty: "Medium", category: "Arrays" }, // Two Pointers
+            { id: "letter-combinations-of-a-phone-number", name: "Letter Combinations of a Phone Number", link: "https://leetcode.com/problems/letter-combinations-of-a-phone-number/", difficulty: "Medium", category: "Backtracking" }, // Strings
+            { id: "remove-nth-node-from-end-of-list", name: "Remove Nth Node From End of List", link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/", difficulty: "Medium", category: "Linked List" },
+            { id: "generate-parentheses", name: "Generate Parentheses", link: "https://leetcode.com/problems/generate-parentheses/", difficulty: "Medium", category: "Backtracking" }, // Strings
+            { id: "group-anagrams", name: "Group Anagrams", link: "https://leetcode.com/problems/group-anagrams/", difficulty: "Medium", category: "Hash Table" }, // Strings
+            { id: "rotate-image", name: "Rotate Image", link: "https://leetcode.com/problems/rotate-image/", difficulty: "Medium", category: "Matrix" }, // Arrays
+            { id: "jump-game", name: "Jump Game", link: "https://leetcode.com/problems/jump-game/", difficulty: "Medium", category: "Greedy" }, // DP, Arrays
+            { id: "merge-intervals", name: "Merge Intervals", link: "https://leetcode.com/problems/merge-intervals/", difficulty: "Medium", category: "Intervals" }, // Sorting, Arrays
+            { id: "unique-paths", name: "Unique Paths", link: "https://leetcode.com/problems/unique-paths/", difficulty: "Medium", category: "DP" }, // Matrix
+            { id: "set-matrix-zeroes", name: "Set Matrix Zeroes", link: "https://leetcode.com/problems/set-matrix-zeroes/", difficulty: "Medium", category: "Matrix" }, // Arrays
+            { id: "search-in-rotated-sorted-array", name: "Search in Rotated Sorted Array", link: "https://leetcode.com/problems/search-in-rotated-sorted-array/", difficulty: "Medium", category: "Searching" }, // Arrays, Binary Search
+            { id: "combination-sum", name: "Combination Sum", link: "https://leetcode.com/problems/combination-sum/", difficulty: "Medium", category: "Backtracking" }, // Arrays
+            { id: "permutations", name: "Permutations", link: "https://leetcode.com/problems/permutations/", difficulty: "Medium", category: "Backtracking" }, // Arrays
+            { id: "kth-smallest-element-in-a-bst", name: "Kth Smallest Element in a BST", link: "https://leetcode.com/problems/kth-smallest-element-in-a-bst/", difficulty: "Medium", category: "Trees" },
+            { id: "binary-tree-level-order-traversal", name: "Binary Tree Level Order Traversal", link: "https://leetcode.com/problems/binary-tree-level-order-traversal/", difficulty: "Medium", category: "Trees" }, // BFS, Queue
+            { id: "validate-binary-search-tree", name: "Validate Binary Search Tree", link: "https://leetcode.com/problems/validate-binary-search-tree/", difficulty: "Medium", category: "Trees" }, // DFS
+            { id: "number-of-islands", name: "Number of Islands", link: "https://leetcode.com/problems/number-of-islands/", difficulty: "Medium", category: "Graphs" }, // BFS, DFS, Matrix
+            { id: "product-of-array-except-self", name: "Product of Array Except Self", link: "https://leetcode.com/problems/product-of-array-except-self/", difficulty: "Medium", category: "Arrays" },
+            { id: "course-schedule", name: "Course Schedule", link: "https://leetcode.com/problems/course-schedule/", difficulty: "Medium", category: "Graphs" }, // Topological Sort, DFS, BFS
+            { id: "implement-trie-prefix-tree", name: "Implement Trie (Prefix Tree)", link: "https://leetcode.com/problems/implement-trie-prefix-tree/", difficulty: "Medium", category: "Design" }, // Trie, Strings
+            { id: "coin-change", name: "Coin Change", link: "https://leetcode.com/problems/coin-change/", difficulty: "Medium", category: "DP" }, // Arrays
+            { id: "longest-increasing-subsequence", name: "Longest Increasing Subsequence", link: "https://leetcode.com/problems/longest-increasing-subsequence/", difficulty: "Medium", category: "DP" }, // Arrays
+            { id: "top-k-frequent-elements", name: "Top K Frequent Elements", link: "https://leetcode.com/problems/top-k-frequent-elements/", difficulty: "Medium", category: "Heap" }, // Hash Table, Arrays
+            { id: "find-the-duplicate-number", name: "Find the Duplicate Number", link: "https://leetcode.com/problems/find-the-duplicate-number/", difficulty: "Medium", category: "Arrays" }, // Two Pointers, Binary Search (variant)
+            { id: "longest-substring-without-repeating-characters", name: "Longest Substring Without Repeating Characters", link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "Medium", category: "Sliding Window" }, // Strings, Hash Table
+            { id: "sort-colors", name: "Sort Colors", link: "https://leetcode.com/problems/sort-colors/", difficulty: "Medium", category: "Arrays" }, // Two Pointers, Sorting
+            { id: "word-break", name: "Word Break", link: "https://leetcode.com/problems/word-break/", difficulty: "Medium", category: "DP" }, // Strings, Hash Table
+            { id: "decode-ways", name: "Decode Ways", link: "https://leetcode.com/problems/decode-ways/", difficulty: "Medium", category: "DP" }, // Strings
+            { id: "construct-binary-tree-from-preorder-and-inorder-traversal", name: "Construct Binary Tree from Preorder and Inorder Traversal", link: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/", difficulty: "Medium", category: "Trees" },
+            { id: "lowest-common-ancestor-of-a-binary-tree", name: "Lowest Common Ancestor of a Binary Tree", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/", difficulty: "Medium", category: "Trees" },
+            { id: "rotting-oranges", name: "Rotting Oranges", link: "https://leetcode.com/problems/rotting-oranges/", difficulty: "Medium", category: "Graphs" }, // BFS, Matrix
+            { id: "search-a-2d-matrix", name: "Search a 2D Matrix", link: "https://leetcode.com/problems/search-a-2d-matrix/", difficulty: "Medium", category: "Searching" }, // Matrix, Binary Search
+            { id: "k-closest-points-to-origin", name: "K Closest Points to Origin", link: "https://leetcode.com/problems/k-closest-points-to-origin/", difficulty: "Medium", category: "Heap" }, // Sorting
+            { id: "time-based-key-value-store", name: "Time Based Key-Value Store", link: "https://leetcode.com/problems/time-based-key-value-store/", difficulty: "Medium", category: "Design" }, // Hash Table, Binary Search
+            { id: "accounts-merge", name: "Accounts Merge", link: "https://leetcode.com/problems/accounts-merge/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS
+            { id: "spiral-matrix", name: "Spiral Matrix", link: "https://leetcode.com/problems/spiral-matrix/", difficulty: "Medium", category: "Matrix" }, // Arrays
+            { id: "subsets", name: "Subsets", link: "https://leetcode.com/problems/subsets/", difficulty: "Medium", category: "Backtracking" }, // Arrays
+            { id: "binary-tree-right-side-view", name: "Binary Tree Right Side View", link: "https://leetcode.com/problems/binary-tree-right-side-view/", difficulty: "Medium", category: "Trees" }, // BFS, DFS
+            { id: "longest-palindromic-substring", name: "Longest Palindromic Substring", link: "https://leetcode.com/problems/longest-palindromic-substring/", difficulty: "Medium", category: "DP" }, // Strings
+            { id: "daily-temperatures", name: "Daily Temperatures", link: "https://leetcode.com/problems/daily-temperatures/", difficulty: "Medium", category: "Stack" }, // Arrays
+            { id: "meeting-rooms-ii", name: "Meeting Rooms II", link: "https://leetcode.com/problems/meeting-rooms-ii/", difficulty: "Medium", category: "Intervals" }, // Heap, Greedy, Sorting (Premium)
+            { id: "serialize-and-deserialize-binary-tree", name: "Serialize and Deserialize Binary Tree", link: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", difficulty: "Hard", category: "Design" }, // Trees, DFS, BFS (Often considered Hard, placed here for flow)
+            { id: "insert-interval", name: "Insert Interval", link: "https://leetcode.com/problems/insert-interval/", difficulty: "Medium", category: "Intervals" }, // Arrays
+            { id: "clone-graph", name: "Clone Graph", link: "https://leetcode.com/problems/clone-graph/", difficulty: "Medium", category: "Graphs" }, // DFS, BFS, Hash Table
+            { id: "pacific-atlantic-water-flow", name: "Pacific Atlantic Water Flow", link: "https://leetcode.com/problems/pacific-atlantic-water-flow/", difficulty: "Medium", category: "Graphs" }, // DFS, BFS, Matrix
+            { id: "graph-valid-tree", name: "Graph Valid Tree", link: "https://leetcode.com/problems/graph-valid-tree/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS, BFS (Premium)
+            { id: "number-of-connected-components-in-an-undirected-graph", name: "Number of Connected Components in an Undirected Graph", link: "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS, BFS (Premium)
+            { id: "encode-and-decode-strings", name: "Encode and Decode Strings", link: "https://leetcode.com/problems/encode-and-decode-strings/", difficulty: "Medium", category: "Design" }, // Strings (Premium)
+            { id: "minimum-knight-moves", name: "Minimum Knight Moves", link: "https://leetcode.com/problems/minimum-knight-moves/", difficulty: "Medium", category: "Graphs" }, // BFS
 
             // Hard
-            { name: "Merge k Sorted Lists", link: "https://leetcode.com/problems/merge-k-sorted-lists/", difficulty: "Hard" },
-            { name: "Median of Two Sorted Arrays", link: "https://leetcode.com/problems/median-of-two-sorted-arrays/", difficulty: "Hard" },
-            { name: "Trapping Rain Water", link: "https://leetcode.com/problems/trapping-rain-water/", difficulty: "Hard" },
-            { name: "Largest Rectangle in Histogram", link: "https://leetcode.com/problems/largest-rectangle-in-histogram/", difficulty: "Hard" },
-            { name: "Word Ladder", link: "https://leetcode.com/problems/word-ladder/", difficulty: "Hard" },
-            { name: "Basic Calculator", link: "https://leetcode.com/problems/basic-calculator/", difficulty: "Hard" },
-            { name: "Regular Expression Matching", link: "https://leetcode.com/problems/regular-expression-matching/", difficulty: "Hard" },
-            { name: "LRU Cache", link: "https://leetcode.com/problems/lru-cache/", difficulty: "Hard" }, // Often considered Medium
-            { name: "Find Median from Data Stream", link: "https://leetcode.com/problems/find-median-from-data-stream/", difficulty: "Hard" },
-            { name: "Sliding Window Maximum", link: "https://leetcode.com/problems/sliding-window-maximum/", difficulty: "Hard" },
-            { name: "Binary Tree Maximum Path Sum", link: "https://leetcode.com/problems/binary-tree-maximum-path-sum/", difficulty: "Hard" },
-            { name: "Edit Distance", link: "https://leetcode.com/problems/edit-distance/", difficulty: "Hard" },
-            { name: "Critical Connections in a Network", link: "https://leetcode.com/problems/critical-connections-in-a-network/", difficulty: "Hard" },
-            { name: "Minimum Window Substring", link: "https://leetcode.com/problems/minimum-window-substring/", difficulty: "Hard" },
-            { name: "Word Search II", link: "https://leetcode.com/problems/word-search-ii/", difficulty: "Hard" },
-            { name: "Alien Dictionary", link: "https://leetcode.com/problems/alien-dictionary/", difficulty: "Hard" }, // Premium
-            { name: "Text Justification", link: "https://leetcode.com/problems/text-justification/", difficulty: "Hard" },
-            { name: "Wildcard Matching", link: "https://leetcode.com/problems/wildcard-matching/", difficulty: "Hard" },
-            { name: "N-Queens", link: "https://leetcode.com/problems/n-queens/", difficulty: "Hard" },
-            { name: "Sudoku Solver", link: "https://leetcode.com/problems/sudoku-solver/", difficulty: "Hard" },
-            { name: "Reverse Nodes in k-Group", link: "https://leetcode.com/problems/reverse-nodes-in-k-group/", difficulty: "Hard" },
-            { name: "Integer to English Words", link: "https://leetcode.com/problems/integer-to-english-words/", difficulty: "Hard" },
-            { name: "Substring with Concatenation of All Words", link: "https://leetcode.com/problems/substring-with-concatenation-of-all-words/", difficulty: "Hard" },
-            { name: "Candy", link: "https://leetcode.com/problems/candy/", difficulty: "Hard" },
-            { name: "Maximal Rectangle", link: "https://leetcode.com/problems/maximal-rectangle/", difficulty: "Hard" }
+            { id: "merge-k-sorted-lists", name: "Merge k Sorted Lists", link: "https://leetcode.com/problems/merge-k-sorted-lists/", difficulty: "Hard", category: "Heap" }, // Linked List
+            { id: "median-of-two-sorted-arrays", name: "Median of Two Sorted Arrays", link: "https://leetcode.com/problems/median-of-two-sorted-arrays/", difficulty: "Hard", category: "Searching" }, // Arrays, Binary Search, Divide and Conquer
+            { id: "trapping-rain-water", name: "Trapping Rain Water", link: "https://leetcode.com/problems/trapping-rain-water/", difficulty: "Hard", category: "Arrays" }, // Two Pointers, DP, Stack
+            { id: "largest-rectangle-in-histogram", name: "Largest Rectangle in Histogram", link: "https://leetcode.com/problems/largest-rectangle-in-histogram/", difficulty: "Hard", category: "Stack" }, // Arrays
+            { id: "word-ladder", name: "Word Ladder", link: "https://leetcode.com/problems/word-ladder/", difficulty: "Hard", category: "Graphs" }, // BFS, Strings
+            { id: "basic-calculator", name: "Basic Calculator", link: "https://leetcode.com/problems/basic-calculator/", difficulty: "Hard", category: "Stack" }, // Math, Strings
+            { id: "regular-expression-matching", name: "Regular Expression Matching", link: "https://leetcode.com/problems/regular-expression-matching/", difficulty: "Hard", category: "DP" }, // Strings
+            { id: "lru-cache", name: "LRU Cache", link: "https://leetcode.com/problems/lru-cache/", difficulty: "Hard", category: "Design" }, // Hash Table, Linked List
+            { id: "find-median-from-data-stream", name: "Find Median from Data Stream", link: "https://leetcode.com/problems/find-median-from-data-stream/", difficulty: "Hard", category: "Heap" }, // Design
+            { id: "sliding-window-maximum", name: "Sliding Window Maximum", link: "https://leetcode.com/problems/sliding-window-maximum/", difficulty: "Hard", category: "Sliding Window" }, // Queue (Deque), Heap
+            { id: "binary-tree-maximum-path-sum", name: "Binary Tree Maximum Path Sum", link: "https://leetcode.com/problems/binary-tree-maximum-path-sum/", difficulty: "Hard", category: "Trees" }, // DFS, DP
+            { id: "edit-distance", name: "Edit Distance", link: "https://leetcode.com/problems/edit-distance/", difficulty: "Hard", category: "DP" }, // Strings
+            { id: "critical-connections-in-a-network", name: "Critical Connections in a Network", link: "https://leetcode.com/problems/critical-connections-in-a-network/", difficulty: "Hard", category: "Graphs" }, // DFS (Tarjan's or Bridges)
+            { id: "minimum-window-substring", name: "Minimum Window Substring", link: "https://leetcode.com/problems/minimum-window-substring/", difficulty: "Hard", category: "Sliding Window" }, // Strings, Hash Table
+            { id: "word-search-ii", name: "Word Search II", link: "https://leetcode.com/problems/word-search-ii/", difficulty: "Hard", category: "Trie" }, // Backtracking, Matrix, Graphs
+            { id: "alien-dictionary", name: "Alien Dictionary", link: "https://leetcode.com/problems/alien-dictionary/", difficulty: "Hard", category: "Graphs" }, // Topological Sort (Premium)
+            { id: "text-justification", name: "Text Justification", link: "https://leetcode.com/problems/text-justification/", difficulty: "Hard", category: "Strings" }, // Greedy
+            { id: "wildcard-matching", name: "Wildcard Matching", link: "https://leetcode.com/problems/wildcard-matching/", difficulty: "Hard", category: "DP" }, // Strings
+            { id: "n-queens", name: "N-Queens", link: "https://leetcode.com/problems/n-queens/", difficulty: "Hard", category: "Backtracking" },
+            { id: "sudoku-solver", name: "Sudoku Solver", link: "https://leetcode.com/problems/sudoku-solver/", difficulty: "Hard", category: "Backtracking" }, // Matrix
+            { id: "reverse-nodes-in-k-group", name: "Reverse Nodes in k-Group", link: "https://leetcode.com/problems/reverse-nodes-in-k-group/", difficulty: "Hard", category: "Linked List" },
+            { id: "integer-to-english-words", name: "Integer to English Words", link: "https://leetcode.com/problems/integer-to-english-words/", difficulty: "Hard", category: "Strings" }, // Math
+            { id: "substring-with-concatenation-of-all-words", name: "Substring with Concatenation of All Words", link: "https://leetcode.com/problems/substring-with-concatenation-of-all-words/", difficulty: "Hard", category: "Sliding Window" }, // Strings, Hash Table
+            { id: "candy", name: "Candy", link: "https://leetcode.com/problems/candy/", difficulty: "Hard", category: "Greedy" }, // Arrays
+            { id: "maximal-rectangle", name: "Maximal Rectangle", link: "https://leetcode.com/problems/maximal-rectangle/", difficulty: "Hard", category: "DP" } // Matrix, Stack (similar to Largest Rectangle in Histogram)
         ];
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const easyList = document.getElementById('easy-questions-list');
-            const mediumList = document.getElementById('medium-questions-list');
-            const hardList = document.getElementById('hard-questions-list');
+        const PROGRESS_STORAGE_KEY = 'codingRoadmapProgress';
 
-            const easyCountEl = document.getElementById('easy-count');
-            const mediumCountEl = document.getElementById('medium-count');
-            const hardCountEl = document.getElementById('hard-count');
+        // --- DOM Elements ---
+        let easyList, mediumList, hardList;
+        let easyCountEl, mediumCountEl, hardCountEl;
+        let categoryFilterEl;
+        let clearProgressBtn;
+
+
+        // --- Local Storage Functions ---
+        function getProgress() {
+            const progress = localStorage.getItem(PROGRESS_STORAGE_KEY);
+            return progress ? JSON.parse(progress) : {};
+        }
+
+        function saveProgress(questionId, isChecked) {
+            const progress = getProgress();
+            progress[questionId] = isChecked;
+            localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+        }
+        
+        function clearAllProgress() {
+            if (confirm("Are you sure you want to clear all your progress? This action cannot be undone.")) {
+                localStorage.removeItem(PROGRESS_STORAGE_KEY);
+                renderQuestions(categoryFilterEl.value); // Re-render to reflect cleared checkboxes
+            }
+        }
+
+
+        // --- Rendering Functions ---
+        function populateFilters() {
+            const categories = [...new Set(questions.map(q => q.category))].sort();
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilterEl.appendChild(option);
+            });
+        }
+
+        function renderQuestions(filterCategory = 'All') {
+            // Clear existing lists
+            easyList.innerHTML = '';
+            mediumList.innerHTML = '';
+            hardList.innerHTML = '';
 
             let easyCounter = 0;
             let mediumCounter = 0;
             let hardCounter = 0;
 
+            const currentProgress = getProgress();
+
             questions.forEach(question => {
+                if (filterCategory !== 'All' && question.category !== filterCategory) {
+                    return; // Skip if not matching the filter
+                }
+
                 const listItem = document.createElement('li');
-                listItem.className = 'bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-all duration-200 ease-in-out transform hover:scale-105';
+                listItem.className = 'bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-all duration-200 ease-in-out';
                 
-                // Truncate long question names
-                const displayName = question.name.length > 40 ? question.name.substring(0, 37) + "..." : question.name;
+                const displayName = question.name.length > 35 ? question.name.substring(0, 32) + "..." : question.name; // Adjusted length
+
+                const isChecked = currentProgress[question.id] || false;
 
                 listItem.innerHTML = `
-                    <a href="${question.link}" target="_blank" rel="noopener noreferrer" class="flex justify-between items-center text-sm sm:text-base">
-                        <span class="text-gray-200 hover:text-blue-400">${displayName}</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                    </a>
+                    <label for="checkbox-${question.id}" class="flex items-center cursor-pointer w-full">
+                        <input type="checkbox" id="checkbox-${question.id}" data-question-id="${question.id}" class="custom-checkbox" ${isChecked ? 'checked' : ''}>
+                        <a href="${question.link}" target="_blank" rel="noopener noreferrer" class="flex-grow flex justify-between items-center text-sm sm:text-base ml-2" onclick="event.stopPropagation();">
+                            <span class="text-gray-200 hover:text-blue-400">${displayName}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                    </label>
                 `;
+
+                // Add event listener for the checkbox
+                const checkbox = listItem.querySelector(`#checkbox-${question.id}`);
+                checkbox.addEventListener('change', (e) => {
+                    saveProgress(e.target.dataset.questionId, e.target.checked);
+                });
+                
+                // Prevent link click when checkbox/label is clicked for better UX
+                listItem.querySelector('label').addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'A' && e.target.tagName !== 'svg' && e.target.tagName !== 'PATH') {
+                         // Allow click to toggle checkbox
+                    }
+                });
+
 
                 if (question.difficulty === 'Easy') {
                     easyList.appendChild(listItem);
@@ -228,8 +332,30 @@
             easyCountEl.textContent = `${easyCounter} questions`;
             mediumCountEl.textContent = `${mediumCounter} questions`;
             hardCountEl.textContent = `${hardCounter} questions`;
+        }
 
-            // Set current year in footer
+        // --- Event Listeners & Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Assign DOM elements
+            easyList = document.getElementById('easy-questions-list');
+            mediumList = document.getElementById('medium-questions-list');
+            hardList = document.getElementById('hard-questions-list');
+            easyCountEl = document.getElementById('easy-count');
+            mediumCountEl = document.getElementById('medium-count');
+            hardCountEl = document.getElementById('hard-count');
+            categoryFilterEl = document.getElementById('category-filter');
+            clearProgressBtn = document.getElementById('clear-progress-btn');
+
+
+            populateFilters();
+            renderQuestions(); // Initial render with all questions
+
+            categoryFilterEl.addEventListener('change', (e) => {
+                renderQuestions(e.target.value);
+            });
+            
+            clearProgressBtn.addEventListener('click', clearAllProgress);
+
             document.getElementById('currentYear').textContent = new Date().getFullYear();
         });
     </script>
