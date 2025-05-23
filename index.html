@@ -10,7 +10,7 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom scrollbar for better aesthetics in dark mode */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -34,13 +34,13 @@
             appearance: none;
             background-color: #374151; /* gray-700 */
             border: 1px solid #6b7280; /* gray-500 */
-            padding: 8px; /* Makes it easier to tap */
+            padding: 8px;
             border-radius: 4px;
             display: inline-block;
             position: relative;
             cursor: pointer;
-            margin-right: 10px; /* Spacing between checkbox and text */
-            flex-shrink: 0; /* Prevent checkbox from shrinking */
+            margin-right: 10px;
+            flex-shrink: 0;
             width: 20px;
             height: 20px;
         }
@@ -57,6 +57,69 @@
             top: 50%;
             transform: translate(-50%, -50%);
         }
+        .company-tag {
+            background-color: #4b5563; /* gray-600 */
+            color: #d1d5db; /* gray-300 */
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem; /* 12px */
+            margin-right: 4px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+        .progress-bar-container {
+            background-color: #374151; /* gray-700 */
+            border-radius: 8px;
+            overflow: hidden;
+            height: 24px; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .progress-bar {
+            background-color: #2563eb; /* blue-600 */
+            height: 100%;
+            transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        /* Celebration Animation Styles */
+        .celebration-particle {
+            position: absolute;
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%;
+            pointer-events: none; 
+            opacity: 0;
+            animation: burst-fade 1.2s ease-out forwards; /* Increased duration */
+            z-index: 1000; 
+        }
+
+        @keyframes burst-fade {
+            0% {
+                transform: scale(0.3) translate(0, 0);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.9;
+            }
+            100% {
+                transform: scale(1.8) translate(var(--tx), var(--ty)); /* Increased final scale */
+                opacity: 0;
+            }
+        }
+        .timer-display {
+            font-size: 0.75rem; /* 12px */
+            color: #9ca3af; /* gray-400 */
+            margin-top: 4px;
+        }
+        .timer-active {
+            color: #f59e0b; /* amber-500 */
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 antialiased">
@@ -68,15 +131,20 @@
         </div>
     </header>
 
-    <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <h3 class="text-lg font-semibold text-gray-300 mb-2">Overall Progress:</h3>
+        <div class="progress-bar-container mb-1">
+            <div id="overall-progress-bar" class="progress-bar" style="width: 0%;">0%</div>
+        </div>
+        <p id="overall-progress-text" class="text-sm text-gray-400 text-right">0/100 Questions Completed</p>
+    </section>
+
+    <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 border-t border-b border-gray-700">
         <div class="flex flex-col sm:flex-row justify-start items-center space-y-3 sm:space-y-0 sm:space-x-4">
             <label for="category-filter" class="text-gray-300 font-medium">Filter by Category:</label>
             <select id="category-filter" class="filter-select p-2 rounded-md shadow">
                 <option value="All">All Categories</option>
                 </select>
-             <button id="clear-progress-btn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-md shadow transition duration-150 ease-in-out">
-                Clear All Progress
-            </button>
         </div>
     </section>
 
@@ -88,8 +156,7 @@
                     <h2 class="text-xl sm:text-2xl font-semibold text-green-400">Easy</h2>
                     <span id="easy-count" class="text-sm text-green-400 bg-green-900 px-2 py-1 rounded-md">0 questions</span>
                 </div>
-                <ul id="easy-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                    </ul>
+                <ul id="easy-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></ul>
             </section>
 
             <section id="medium-questions-container" class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-2xl">
@@ -97,8 +164,7 @@
                     <h2 class="text-xl sm:text-2xl font-semibold text-yellow-400">Medium</h2>
                     <span id="medium-count" class="text-sm text-yellow-400 bg-yellow-900 px-2 py-1 rounded-md">0 questions</span>
                 </div>
-                <ul id="medium-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                    </ul>
+                <ul id="medium-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></ul>
             </section>
 
             <section id="hard-questions-container" class="bg-gray-800 p-5 sm:p-6 rounded-xl shadow-2xl">
@@ -106,8 +172,7 @@
                     <h2 class="text-xl sm:text-2xl font-semibold text-red-400">Hard</h2>
                     <span id="hard-count" class="text-sm text-red-400 bg-red-900 px-2 py-1 rounded-md">0 questions</span>
                 </div>
-                <ul id="hard-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
-                    </ul>
+                <ul id="hard-questions-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></ul>
             </section>
         </div>
     </main>
@@ -115,146 +180,244 @@
     <footer class="text-center py-8 mt-8 border-t border-gray-700">
         <p class="text-gray-500 text-sm">&copy; <span id="currentYear"></span> Coding Roadmap. Practice consistently!</p>
         <p class="text-gray-600 text-xs mt-1">Inspired by common interview preparation patterns. Not affiliated with LeetCode.</p>
+        <div class="mt-6"> 
+            <button id="clear-progress-btn" class="text-xs text-gray-500 hover:text-red-400 hover:underline transition duration-150 ease-in-out px-3 py-1">
+                Clear All Progress
+            </button>
+        </div>
     </footer>
 
     <script>
-        // --- DATA ---
+        // --- DATA (Using the full 100 questions data from previous steps) ---
         const questions = [
             // Easy
-            { id: "two-sum", name: "Two Sum", link: "https://leetcode.com/problems/two-sum/", difficulty: "Easy", category: "Arrays" },
-            { id: "reverse-string", name: "Reverse String", link: "https://leetcode.com/problems/reverse-string/", difficulty: "Easy", category: "Strings" },
-            { id: "valid-parentheses", name: "Valid Parentheses", link: "https://leetcode.com/problems/valid-parentheses/", difficulty: "Easy", category: "Stack" },
-            { id: "merge-two-sorted-lists", name: "Merge Two Sorted Lists", link: "https://leetcode.com/problems/merge-two-sorted-lists/", difficulty: "Easy", category: "Linked List" },
-            { id: "best-time-to-buy-and-sell-stock", name: "Best Time to Buy and Sell Stock", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/", difficulty: "Easy", category: "Arrays" },
-            { id: "valid-palindrome", name: "Valid Palindrome", link: "https://leetcode.com/problems/valid-palindrome/", difficulty: "Easy", category: "Strings" },
-            { id: "invert-binary-tree", name: "Invert Binary Tree", link: "https://leetcode.com/problems/invert-binary-tree/", difficulty: "Easy", category: "Trees" },
-            { id: "valid-anagram", name: "Valid Anagram", link: "https://leetcode.com/problems/valid-anagram/", difficulty: "Easy", category: "Strings" }, // Hash Table also applicable
-            { id: "binary-search", name: "Binary Search", link: "https://leetcode.com/problems/binary-search/", difficulty: "Easy", category: "Searching" },
-            { id: "maximum-depth-of-binary-tree", name: "Maximum Depth of Binary Tree", link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/", difficulty: "Easy", category: "Trees" },
-            { id: "contains-duplicate", name: "Contains Duplicate", link: "https://leetcode.com/problems/contains-duplicate/", difficulty: "Easy", category: "Arrays" }, // Hash Table
-            { id: "linked-list-cycle", name: "Linked List Cycle", link: "https://leetcode.com/problems/linked-list-cycle/", difficulty: "Easy", category: "Linked List" },
-            { id: "climbing-stairs", name: "Climbing Stairs", link: "https://leetcode.com/problems/climbing-stairs/", difficulty: "Easy", category: "DP" },
-            { id: "missing-number", name: "Missing Number", link: "https://leetcode.com/problems/missing-number/", difficulty: "Easy", category: "Arrays" }, // Bit Manipulation, Math
-            { id: "majority-element", name: "Majority Element", link: "https://leetcode.com/problems/majority-element/", difficulty: "Easy", category: "Arrays" }, // Sorting, Hash Table
-            { id: "move-zeroes", name: "Move Zeroes", link: "https://leetcode.com/problems/move-zeroes/", difficulty: "Easy", category: "Arrays" }, // Two Pointers
-            { id: "symmetric-tree", name: "Symmetric Tree", link: "https://leetcode.com/problems/symmetric-tree/", difficulty: "Easy", category: "Trees" },
-            { id: "palindrome-linked-list", name: "Palindrome Linked List", link: "https://leetcode.com/problems/palindrome-linked-list/", difficulty: "Easy", category: "Linked List" },
-            { id: "lowest-common-ancestor-of-a-bst", name: "Lowest Common Ancestor of a BST", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", difficulty: "Easy", category: "Trees" },
-            { id: "first-bad-version", name: "First Bad Version", link: "https://leetcode.com/problems/first-bad-version/", difficulty: "Easy", category: "Searching" }, // Binary Search
-            { id: "ransom-note", name: "Ransom Note", link: "https://leetcode.com/problems/ransom-note/", difficulty: "Easy", category: "Strings" }, // Hash Table
-            { id: "implement-queue-using-stacks", name: "Implement Queue using Stacks", link: "https://leetcode.com/problems/implement-queue-using-stacks/", difficulty: "Easy", category: "Stack" }, // Queue, Design
-            { id: "implement-stack-using-queues", name: "Implement Stack using Queues", link: "https://leetcode.com/problems/implement-stack-using-queues/", difficulty: "Easy", category: "Queue" }, // Stack, Design
-            { id: "diameter-of-binary-tree", name: "Diameter of Binary Tree", link: "https://leetcode.com/problems/diameter-of-binary-tree/", difficulty: "Easy", category: "Trees" },
-            { id: "middle-of-the-linked-list", name: "Middle of the Linked List", link: "https://leetcode.com/problems/middle-of-the-linked-list/", difficulty: "Easy", category: "Linked List" },
+            { id: "two-sum", name: "Two Sum", link: "https://leetcode.com/problems/two-sum/", difficulty: "Easy", category: "Arrays", companies: ["Amazon", "Google", "Meta", "Apple"] },
+            { id: "reverse-string", name: "Reverse String", link: "https://leetcode.com/problems/reverse-string/", difficulty: "Easy", category: "Strings", companies: ["Microsoft", "Uber"] },
+            { id: "valid-parentheses", name: "Valid Parentheses", link: "https://leetcode.com/problems/valid-parentheses/", difficulty: "Easy", category: "Stack", companies: ["Google", "Amazon", "Bloomberg"] },
+            { id: "merge-two-sorted-lists", name: "Merge Two Sorted Lists", link: "https://leetcode.com/problems/merge-two-sorted-lists/", difficulty: "Easy", category: "Linked List", companies: ["Amazon", "Microsoft"] },
+            { id: "best-time-to-buy-and-sell-stock", name: "Best Time to Buy and Sell Stock", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/", difficulty: "Easy", category: "Arrays", companies: ["Meta", "Amazon", "Uber"] },
+            { id: "valid-palindrome", name: "Valid Palindrome", link: "https://leetcode.com/problems/valid-palindrome/", difficulty: "Easy", category: "Strings", companies: ["Meta", "Microsoft"] },
+            { id: "invert-binary-tree", name: "Invert Binary Tree", link: "https://leetcode.com/problems/invert-binary-tree/", difficulty: "Easy", category: "Trees", companies: ["Google"] },
+            { id: "valid-anagram", name: "Valid Anagram", link: "https://leetcode.com/problems/valid-anagram/", difficulty: "Easy", category: "Strings", companies: ["Amazon", "Uber"] },
+            { id: "binary-search", name: "Binary Search", link: "https://leetcode.com/problems/binary-search/", difficulty: "Easy", category: "Searching", companies: ["Microsoft", "Google"] },
+            { id: "maximum-depth-of-binary-tree", name: "Maximum Depth of Binary Tree", link: "https://leetcode.com/problems/maximum-depth-of-binary-tree/", difficulty: "Easy", category: "Trees", companies: ["Amazon", "LinkedIn"] },
+            { id: "contains-duplicate", name: "Contains Duplicate", link: "https://leetcode.com/problems/contains-duplicate/", difficulty: "Easy", category: "Arrays", companies: ["Amazon", "Apple", "Adobe"] },
+            { id: "linked-list-cycle", name: "Linked List Cycle", link: "https://leetcode.com/problems/linked-list-cycle/", difficulty: "Easy", category: "Linked List", companies: ["Amazon", "Microsoft", "Apple"] },
+            { id: "climbing-stairs", name: "Climbing Stairs", link: "https://leetcode.com/problems/climbing-stairs/", difficulty: "Easy", category: "DP", companies: ["Adobe", "Apple"] },
+            { id: "missing-number", name: "Missing Number", link: "https://leetcode.com/problems/missing-number/", difficulty: "Easy", category: "Arrays", companies: ["Amazon", "Microsoft"] },
+            { id: "majority-element", name: "Majority Element", link: "https://leetcode.com/problems/majority-element/", difficulty: "Easy", category: "Arrays", companies: ["Adobe", "Microsoft"] },
+            { id: "move-zeroes", name: "Move Zeroes", link: "https://leetcode.com/problems/move-zeroes/", difficulty: "Easy", category: "Arrays", companies: ["Meta", "Bloomberg"] },
+            { id: "symmetric-tree", name: "Symmetric Tree", link: "https://leetcode.com/problems/symmetric-tree/", difficulty: "Easy", category: "Trees", companies: ["Microsoft", "LinkedIn"] },
+            { id: "palindrome-linked-list", name: "Palindrome Linked List", link: "https://leetcode.com/problems/palindrome-linked-list/", difficulty: "Easy", category: "Linked List", companies: ["Amazon", "Microsoft"] },
+            { id: "lowest-common-ancestor-of-a-bst", name: "Lowest Common Ancestor of a BST", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/", difficulty: "Easy", category: "Trees", companies: ["Amazon", "Meta", "Microsoft"] },
+            { id: "first-bad-version", name: "First Bad Version", link: "https://leetcode.com/problems/first-bad-version/", difficulty: "Easy", category: "Searching", companies: ["Meta"] },
+            { id: "ransom-note", name: "Ransom Note", link: "https://leetcode.com/problems/ransom-note/", difficulty: "Easy", category: "Strings", companies: ["Amazon", "Microsoft"] },
+            { id: "implement-queue-using-stacks", name: "Implement Queue using Stacks", link: "https://leetcode.com/problems/implement-queue-using-stacks/", difficulty: "Easy", category: "Stack", companies: ["Amazon", "Microsoft", "Bloomberg"] },
+            { id: "implement-stack-using-queues", name: "Implement Stack using Queues", link: "https://leetcode.com/problems/implement-stack-using-queues/", difficulty: "Easy", category: "Queue", companies: ["Amazon", "Bloomberg"] },
+            { id: "diameter-of-binary-tree", name: "Diameter of Binary Tree", link: "https://leetcode.com/problems/diameter-of-binary-tree/", difficulty: "Easy", category: "Trees", companies: ["Google", "Meta"] },
+            { id: "middle-of-the-linked-list", name: "Middle of the Linked List", link: "https://leetcode.com/problems/middle-of-the-linked-list/", difficulty: "Easy", category: "Linked List", companies: ["Amazon", "Microsoft"] },
 
             // Medium
-            { id: "3sum", name: "3Sum", link: "https://leetcode.com/problems/3sum/", difficulty: "Medium", category: "Arrays" }, // Two Pointers
-            { id: "container-with-most-water", name: "Container With Most Water", link: "https://leetcode.com/problems/container-with-most-water/", difficulty: "Medium", category: "Arrays" }, // Two Pointers
-            { id: "letter-combinations-of-a-phone-number", name: "Letter Combinations of a Phone Number", link: "https://leetcode.com/problems/letter-combinations-of-a-phone-number/", difficulty: "Medium", category: "Backtracking" }, // Strings
-            { id: "remove-nth-node-from-end-of-list", name: "Remove Nth Node From End of List", link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/", difficulty: "Medium", category: "Linked List" },
-            { id: "generate-parentheses", name: "Generate Parentheses", link: "https://leetcode.com/problems/generate-parentheses/", difficulty: "Medium", category: "Backtracking" }, // Strings
-            { id: "group-anagrams", name: "Group Anagrams", link: "https://leetcode.com/problems/group-anagrams/", difficulty: "Medium", category: "Hash Table" }, // Strings
-            { id: "rotate-image", name: "Rotate Image", link: "https://leetcode.com/problems/rotate-image/", difficulty: "Medium", category: "Matrix" }, // Arrays
-            { id: "jump-game", name: "Jump Game", link: "https://leetcode.com/problems/jump-game/", difficulty: "Medium", category: "Greedy" }, // DP, Arrays
-            { id: "merge-intervals", name: "Merge Intervals", link: "https://leetcode.com/problems/merge-intervals/", difficulty: "Medium", category: "Intervals" }, // Sorting, Arrays
-            { id: "unique-paths", name: "Unique Paths", link: "https://leetcode.com/problems/unique-paths/", difficulty: "Medium", category: "DP" }, // Matrix
-            { id: "set-matrix-zeroes", name: "Set Matrix Zeroes", link: "https://leetcode.com/problems/set-matrix-zeroes/", difficulty: "Medium", category: "Matrix" }, // Arrays
-            { id: "search-in-rotated-sorted-array", name: "Search in Rotated Sorted Array", link: "https://leetcode.com/problems/search-in-rotated-sorted-array/", difficulty: "Medium", category: "Searching" }, // Arrays, Binary Search
-            { id: "combination-sum", name: "Combination Sum", link: "https://leetcode.com/problems/combination-sum/", difficulty: "Medium", category: "Backtracking" }, // Arrays
-            { id: "permutations", name: "Permutations", link: "https://leetcode.com/problems/permutations/", difficulty: "Medium", category: "Backtracking" }, // Arrays
-            { id: "kth-smallest-element-in-a-bst", name: "Kth Smallest Element in a BST", link: "https://leetcode.com/problems/kth-smallest-element-in-a-bst/", difficulty: "Medium", category: "Trees" },
-            { id: "binary-tree-level-order-traversal", name: "Binary Tree Level Order Traversal", link: "https://leetcode.com/problems/binary-tree-level-order-traversal/", difficulty: "Medium", category: "Trees" }, // BFS, Queue
-            { id: "validate-binary-search-tree", name: "Validate Binary Search Tree", link: "https://leetcode.com/problems/validate-binary-search-tree/", difficulty: "Medium", category: "Trees" }, // DFS
-            { id: "number-of-islands", name: "Number of Islands", link: "https://leetcode.com/problems/number-of-islands/", difficulty: "Medium", category: "Graphs" }, // BFS, DFS, Matrix
-            { id: "product-of-array-except-self", name: "Product of Array Except Self", link: "https://leetcode.com/problems/product-of-array-except-self/", difficulty: "Medium", category: "Arrays" },
-            { id: "course-schedule", name: "Course Schedule", link: "https://leetcode.com/problems/course-schedule/", difficulty: "Medium", category: "Graphs" }, // Topological Sort, DFS, BFS
-            { id: "implement-trie-prefix-tree", name: "Implement Trie (Prefix Tree)", link: "https://leetcode.com/problems/implement-trie-prefix-tree/", difficulty: "Medium", category: "Design" }, // Trie, Strings
-            { id: "coin-change", name: "Coin Change", link: "https://leetcode.com/problems/coin-change/", difficulty: "Medium", category: "DP" }, // Arrays
-            { id: "longest-increasing-subsequence", name: "Longest Increasing Subsequence", link: "https://leetcode.com/problems/longest-increasing-subsequence/", difficulty: "Medium", category: "DP" }, // Arrays
-            { id: "top-k-frequent-elements", name: "Top K Frequent Elements", link: "https://leetcode.com/problems/top-k-frequent-elements/", difficulty: "Medium", category: "Heap" }, // Hash Table, Arrays
-            { id: "find-the-duplicate-number", name: "Find the Duplicate Number", link: "https://leetcode.com/problems/find-the-duplicate-number/", difficulty: "Medium", category: "Arrays" }, // Two Pointers, Binary Search (variant)
-            { id: "longest-substring-without-repeating-characters", name: "Longest Substring Without Repeating Characters", link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "Medium", category: "Sliding Window" }, // Strings, Hash Table
-            { id: "sort-colors", name: "Sort Colors", link: "https://leetcode.com/problems/sort-colors/", difficulty: "Medium", category: "Arrays" }, // Two Pointers, Sorting
-            { id: "word-break", name: "Word Break", link: "https://leetcode.com/problems/word-break/", difficulty: "Medium", category: "DP" }, // Strings, Hash Table
-            { id: "decode-ways", name: "Decode Ways", link: "https://leetcode.com/problems/decode-ways/", difficulty: "Medium", category: "DP" }, // Strings
-            { id: "construct-binary-tree-from-preorder-and-inorder-traversal", name: "Construct Binary Tree from Preorder and Inorder Traversal", link: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/", difficulty: "Medium", category: "Trees" },
-            { id: "lowest-common-ancestor-of-a-binary-tree", name: "Lowest Common Ancestor of a Binary Tree", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/", difficulty: "Medium", category: "Trees" },
-            { id: "rotting-oranges", name: "Rotting Oranges", link: "https://leetcode.com/problems/rotting-oranges/", difficulty: "Medium", category: "Graphs" }, // BFS, Matrix
-            { id: "search-a-2d-matrix", name: "Search a 2D Matrix", link: "https://leetcode.com/problems/search-a-2d-matrix/", difficulty: "Medium", category: "Searching" }, // Matrix, Binary Search
-            { id: "k-closest-points-to-origin", name: "K Closest Points to Origin", link: "https://leetcode.com/problems/k-closest-points-to-origin/", difficulty: "Medium", category: "Heap" }, // Sorting
-            { id: "time-based-key-value-store", name: "Time Based Key-Value Store", link: "https://leetcode.com/problems/time-based-key-value-store/", difficulty: "Medium", category: "Design" }, // Hash Table, Binary Search
-            { id: "accounts-merge", name: "Accounts Merge", link: "https://leetcode.com/problems/accounts-merge/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS
-            { id: "spiral-matrix", name: "Spiral Matrix", link: "https://leetcode.com/problems/spiral-matrix/", difficulty: "Medium", category: "Matrix" }, // Arrays
-            { id: "subsets", name: "Subsets", link: "https://leetcode.com/problems/subsets/", difficulty: "Medium", category: "Backtracking" }, // Arrays
-            { id: "binary-tree-right-side-view", name: "Binary Tree Right Side View", link: "https://leetcode.com/problems/binary-tree-right-side-view/", difficulty: "Medium", category: "Trees" }, // BFS, DFS
-            { id: "longest-palindromic-substring", name: "Longest Palindromic Substring", link: "https://leetcode.com/problems/longest-palindromic-substring/", difficulty: "Medium", category: "DP" }, // Strings
-            { id: "daily-temperatures", name: "Daily Temperatures", link: "https://leetcode.com/problems/daily-temperatures/", difficulty: "Medium", category: "Stack" }, // Arrays
-            { id: "meeting-rooms-ii", name: "Meeting Rooms II", link: "https://leetcode.com/problems/meeting-rooms-ii/", difficulty: "Medium", category: "Intervals" }, // Heap, Greedy, Sorting (Premium)
-            { id: "serialize-and-deserialize-binary-tree", name: "Serialize and Deserialize Binary Tree", link: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", difficulty: "Hard", category: "Design" }, // Trees, DFS, BFS (Often considered Hard, placed here for flow)
-            { id: "insert-interval", name: "Insert Interval", link: "https://leetcode.com/problems/insert-interval/", difficulty: "Medium", category: "Intervals" }, // Arrays
-            { id: "clone-graph", name: "Clone Graph", link: "https://leetcode.com/problems/clone-graph/", difficulty: "Medium", category: "Graphs" }, // DFS, BFS, Hash Table
-            { id: "pacific-atlantic-water-flow", name: "Pacific Atlantic Water Flow", link: "https://leetcode.com/problems/pacific-atlantic-water-flow/", difficulty: "Medium", category: "Graphs" }, // DFS, BFS, Matrix
-            { id: "graph-valid-tree", name: "Graph Valid Tree", link: "https://leetcode.com/problems/graph-valid-tree/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS, BFS (Premium)
-            { id: "number-of-connected-components-in-an-undirected-graph", name: "Number of Connected Components in an Undirected Graph", link: "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/", difficulty: "Medium", category: "Graphs" }, // Union Find, DFS, BFS (Premium)
-            { id: "encode-and-decode-strings", name: "Encode and Decode Strings", link: "https://leetcode.com/problems/encode-and-decode-strings/", difficulty: "Medium", category: "Design" }, // Strings (Premium)
-            { id: "minimum-knight-moves", name: "Minimum Knight Moves", link: "https://leetcode.com/problems/minimum-knight-moves/", difficulty: "Medium", category: "Graphs" }, // BFS
+            { id: "3sum", name: "3Sum", link: "https://leetcode.com/problems/3sum/", difficulty: "Medium", category: "Arrays", companies: ["Amazon", "Meta", "Microsoft", "Google"] },
+            { id: "container-with-most-water", name: "Container With Most Water", link: "https://leetcode.com/problems/container-with-most-water/", difficulty: "Medium", category: "Arrays", companies: ["Google", "Amazon", "Meta"] },
+            { id: "letter-combinations-of-a-phone-number", name: "Letter Combinations of a Phone Number", link: "https://leetcode.com/problems/letter-combinations-of-a-phone-number/", difficulty: "Medium", category: "Backtracking", companies: ["Amazon", "Meta", "Uber"] },
+            { id: "remove-nth-node-from-end-of-list", name: "Remove Nth Node From End of List", link: "https://leetcode.com/problems/remove-nth-node-from-end-of-list/", difficulty: "Medium", category: "Linked List", companies: ["Amazon", "Microsoft", "Meta"] },
+            { id: "generate-parentheses", name: "Generate Parentheses", link: "https://leetcode.com/problems/generate-parentheses/", difficulty: "Medium", category: "Backtracking", companies: ["Google", "Amazon", "Uber"] },
+            { id: "group-anagrams", name: "Group Anagrams", link: "https://leetcode.com/problems/group-anagrams/", difficulty: "Medium", category: "Hash Table", companies: ["Amazon", "Meta", "Bloomberg", "Uber"] },
+            { id: "rotate-image", name: "Rotate Image", link: "https://leetcode.com/problems/rotate-image/", difficulty: "Medium", category: "Matrix", companies: ["Amazon", "Microsoft", "Apple"] },
+            { id: "jump-game", name: "Jump Game", link: "https://leetcode.com/problems/jump-game/", difficulty: "Medium", category: "Greedy", companies: ["Amazon", "Meta", "Microsoft"] },
+            { id: "merge-intervals", name: "Merge Intervals", link: "https://leetcode.com/problems/merge-intervals/", difficulty: "Medium", category: "Intervals", companies: ["Amazon", "Google", "Meta", "LinkedIn"] },
+            { id: "unique-paths", name: "Unique Paths", link: "https://leetcode.com/problems/unique-paths/", difficulty: "Medium", category: "DP", companies: ["Amazon", "Google", "Microsoft"] },
+            { id: "set-matrix-zeroes", name: "Set Matrix Zeroes", link: "https://leetcode.com/problems/set-matrix-zeroes/", difficulty: "Medium", category: "Matrix", companies: ["Amazon", "Meta", "Microsoft"] },
+            { id: "search-in-rotated-sorted-array", name: "Search in Rotated Sorted Array", link: "https://leetcode.com/problems/search-in-rotated-sorted-array/", difficulty: "Medium", category: "Searching", companies: ["Amazon", "Microsoft", "Meta", "LinkedIn"] },
+            { id: "combination-sum", name: "Combination Sum", link: "https://leetcode.com/problems/combination-sum/", difficulty: "Medium", category: "Backtracking", companies: ["Amazon", "Meta", "Uber", "Airbnb"] },
+            { id: "permutations", name: "Permutations", link: "https://leetcode.com/problems/permutations/", difficulty: "Medium", category: "Backtracking", companies: ["Amazon", "Microsoft", "Meta", "LinkedIn"] },
+            { id: "kth-smallest-element-in-a-bst", name: "Kth Smallest Element in a BST", link: "https://leetcode.com/problems/kth-smallest-element-in-a-bst/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Google", "Meta"] },
+            { id: "binary-tree-level-order-traversal", name: "Binary Tree Level Order Traversal", link: "https://leetcode.com/problems/binary-tree-level-order-traversal/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Meta", "Microsoft", "LinkedIn"] },
+            { id: "validate-binary-search-tree", name: "Validate Binary Search Tree", link: "https://leetcode.com/problems/validate-binary-search-tree/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Microsoft", "Bloomberg"] },
+            { id: "number-of-islands", name: "Number of Islands", link: "https://leetcode.com/problems/number-of-islands/", difficulty: "Medium", category: "Graphs", companies: ["Amazon", "Google", "Meta", "Microsoft"] },
+            { id: "product-of-array-except-self", name: "Product of Array Except Self", link: "https://leetcode.com/problems/product-of-array-except-self/", difficulty: "Medium", category: "Arrays", companies: ["Amazon", "Meta", "Microsoft", "Apple"] },
+            { id: "course-schedule", name: "Course Schedule", link: "https://leetcode.com/problems/course-schedule/", difficulty: "Medium", category: "Graphs", companies: ["Amazon", "Google", "Meta", "Uber"] },
+            { id: "implement-trie-prefix-tree", name: "Implement Trie (Prefix Tree)", link: "https://leetcode.com/problems/implement-trie-prefix-tree/", difficulty: "Medium", category: "Design", companies: ["Amazon", "Google", "Microsoft", "Twitter"] },
+            { id: "coin-change", name: "Coin Change", link: "https://leetcode.com/problems/coin-change/", difficulty: "Medium", category: "DP", companies: ["Amazon", "Google", "Meta", "Microsoft"] },
+            { id: "longest-increasing-subsequence", name: "Longest Increasing Subsequence", link: "https://leetcode.com/problems/longest-increasing-subsequence/", difficulty: "Medium", category: "DP", companies: ["Amazon", "Google", "Microsoft"] },
+            { id: "top-k-frequent-elements", name: "Top K Frequent Elements", link: "https://leetcode.com/problems/top-k-frequent-elements/", difficulty: "Medium", category: "Heap", companies: ["Amazon", "Meta", "Microsoft", "Uber"] },
+            { id: "find-the-duplicate-number", name: "Find the Duplicate Number", link: "https://leetcode.com/problems/find-the-duplicate-number/", difficulty: "Medium", category: "Arrays", companies: ["Amazon", "Microsoft", "Google"] },
+            { id: "longest-substring-without-repeating-characters", name: "Longest Substring Without Repeating Characters", link: "https://leetcode.com/problems/longest-substring-without-repeating-characters/", difficulty: "Medium", category: "Sliding Window", companies: ["Amazon", "Google", "Meta", "Microsoft"] },
+            { id: "sort-colors", name: "Sort Colors", link: "https://leetcode.com/problems/sort-colors/", difficulty: "Medium", category: "Arrays", companies: ["Microsoft", "Meta", "Amazon"] },
+            { id: "word-break", name: "Word Break", link: "https://leetcode.com/problems/word-break/", difficulty: "Medium", category: "DP", companies: ["Amazon", "Google", "Meta", "Uber"] },
+            { id: "decode-ways", name: "Decode Ways", link: "https://leetcode.com/problems/decode-ways/", difficulty: "Medium", category: "DP", companies: ["Meta", "Amazon", "Google"] },
+            { id: "construct-binary-tree-from-preorder-and-inorder-traversal", name: "Construct Binary Tree from Preorder and Inorder Traversal", link: "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Microsoft", "Bloomberg"] },
+            { id: "lowest-common-ancestor-of-a-binary-tree", name: "Lowest Common Ancestor of a Binary Tree", link: "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Meta", "Microsoft", "Apple", "LinkedIn"] },
+            { id: "rotting-oranges", name: "Rotting Oranges", link: "https://leetcode.com/problems/rotting-oranges/", difficulty: "Medium", category: "Graphs", companies: ["Amazon", "Google", "Microsoft"] },
+            { id: "search-a-2d-matrix", name: "Search a 2D Matrix", link: "https://leetcode.com/problems/search-a-2d-matrix/", difficulty: "Medium", category: "Searching", companies: ["Amazon", "Microsoft", "Apple"] },
+            { id: "k-closest-points-to-origin", name: "K Closest Points to Origin", link: "https://leetcode.com/problems/k-closest-points-to-origin/", difficulty: "Medium", category: "Heap", companies: ["Amazon", "Meta", "LinkedIn", "Asana"] },
+            { id: "time-based-key-value-store", name: "Time Based Key-Value Store", link: "https://leetcode.com/problems/time-based-key-value-store/", difficulty: "Medium", category: "Design", companies: ["Amazon", "Google", "Lyft"] },
+            { id: "accounts-merge", name: "Accounts Merge", link: "https://leetcode.com/problems/accounts-merge/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Amazon", "Meta"] },
+            { id: "spiral-matrix", name: "Spiral Matrix", link: "https://leetcode.com/problems/spiral-matrix/", difficulty: "Medium", category: "Matrix", companies: ["Amazon", "Microsoft", "Apple", "Google"] },
+            { id: "subsets", name: "Subsets", link: "https://leetcode.com/problems/subsets/", difficulty: "Medium", category: "Backtracking", companies: ["Amazon", "Meta", "Microsoft", "Bloomberg"] },
+            { id: "binary-tree-right-side-view", name: "Binary Tree Right Side View", link: "https://leetcode.com/problems/binary-tree-right-side-view/", difficulty: "Medium", category: "Trees", companies: ["Amazon", "Meta", "Microsoft"] },
+            { id: "longest-palindromic-substring", name: "Longest Palindromic Substring", link: "https://leetcode.com/problems/longest-palindromic-substring/", difficulty: "Medium", category: "DP", companies: ["Amazon", "Microsoft", "Google"] },
+            { id: "daily-temperatures", name: "Daily Temperatures", link: "https://leetcode.com/problems/daily-temperatures/", difficulty: "Medium", category: "Stack", companies: ["Amazon", "Google", "Meta"] },
+            { id: "meeting-rooms-ii", name: "Meeting Rooms II", link: "https://leetcode.com/problems/meeting-rooms-ii/", difficulty: "Medium", category: "Intervals", companies: ["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"] },
+            { id: "serialize-and-deserialize-binary-tree", name: "Serialize and Deserialize Binary Tree", link: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/", difficulty: "Hard", category: "Design", companies: ["Amazon", "Google", "Meta", "Microsoft", "LinkedIn"] },
+            { id: "insert-interval", name: "Insert Interval", link: "https://leetcode.com/problems/insert-interval/", difficulty: "Medium", category: "Intervals", companies: ["Google", "Meta", "LinkedIn", "Amazon"] },
+            { id: "clone-graph", name: "Clone Graph", link: "https://leetcode.com/problems/clone-graph/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Meta", "Amazon", "Microsoft"] },
+            { id: "pacific-atlantic-water-flow", name: "Pacific Atlantic Water Flow", link: "https://leetcode.com/problems/pacific-atlantic-water-flow/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Amazon", "Microsoft"] },
+            { id: "graph-valid-tree", name: "Graph Valid Tree", link: "https://leetcode.com/problems/graph-valid-tree/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Meta", "Amazon"] },
+            { id: "number-of-connected-components-in-an-undirected-graph", name: "Number of Connected Components in an Undirected Graph", link: "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Amazon", "LinkedIn"] },
+            { id: "encode-and-decode-strings", name: "Encode and Decode Strings", link: "https://leetcode.com/problems/encode-and-decode-strings/", difficulty: "Medium", category: "Design", companies: ["Google", "Meta", "Amazon", "Dropbox"] },
+            { id: "minimum-knight-moves", name: "Minimum Knight Moves", link: "https://leetcode.com/problems/minimum-knight-moves/", difficulty: "Medium", category: "Graphs", companies: ["Google", "Amazon", "Microsoft"] },
 
             // Hard
-            { id: "merge-k-sorted-lists", name: "Merge k Sorted Lists", link: "https://leetcode.com/problems/merge-k-sorted-lists/", difficulty: "Hard", category: "Heap" }, // Linked List
-            { id: "median-of-two-sorted-arrays", name: "Median of Two Sorted Arrays", link: "https://leetcode.com/problems/median-of-two-sorted-arrays/", difficulty: "Hard", category: "Searching" }, // Arrays, Binary Search, Divide and Conquer
-            { id: "trapping-rain-water", name: "Trapping Rain Water", link: "https://leetcode.com/problems/trapping-rain-water/", difficulty: "Hard", category: "Arrays" }, // Two Pointers, DP, Stack
-            { id: "largest-rectangle-in-histogram", name: "Largest Rectangle in Histogram", link: "https://leetcode.com/problems/largest-rectangle-in-histogram/", difficulty: "Hard", category: "Stack" }, // Arrays
-            { id: "word-ladder", name: "Word Ladder", link: "https://leetcode.com/problems/word-ladder/", difficulty: "Hard", category: "Graphs" }, // BFS, Strings
-            { id: "basic-calculator", name: "Basic Calculator", link: "https://leetcode.com/problems/basic-calculator/", difficulty: "Hard", category: "Stack" }, // Math, Strings
-            { id: "regular-expression-matching", name: "Regular Expression Matching", link: "https://leetcode.com/problems/regular-expression-matching/", difficulty: "Hard", category: "DP" }, // Strings
-            { id: "lru-cache", name: "LRU Cache", link: "https://leetcode.com/problems/lru-cache/", difficulty: "Hard", category: "Design" }, // Hash Table, Linked List
-            { id: "find-median-from-data-stream", name: "Find Median from Data Stream", link: "https://leetcode.com/problems/find-median-from-data-stream/", difficulty: "Hard", category: "Heap" }, // Design
-            { id: "sliding-window-maximum", name: "Sliding Window Maximum", link: "https://leetcode.com/problems/sliding-window-maximum/", difficulty: "Hard", category: "Sliding Window" }, // Queue (Deque), Heap
-            { id: "binary-tree-maximum-path-sum", name: "Binary Tree Maximum Path Sum", link: "https://leetcode.com/problems/binary-tree-maximum-path-sum/", difficulty: "Hard", category: "Trees" }, // DFS, DP
-            { id: "edit-distance", name: "Edit Distance", link: "https://leetcode.com/problems/edit-distance/", difficulty: "Hard", category: "DP" }, // Strings
-            { id: "critical-connections-in-a-network", name: "Critical Connections in a Network", link: "https://leetcode.com/problems/critical-connections-in-a-network/", difficulty: "Hard", category: "Graphs" }, // DFS (Tarjan's or Bridges)
-            { id: "minimum-window-substring", name: "Minimum Window Substring", link: "https://leetcode.com/problems/minimum-window-substring/", difficulty: "Hard", category: "Sliding Window" }, // Strings, Hash Table
-            { id: "word-search-ii", name: "Word Search II", link: "https://leetcode.com/problems/word-search-ii/", difficulty: "Hard", category: "Trie" }, // Backtracking, Matrix, Graphs
-            { id: "alien-dictionary", name: "Alien Dictionary", link: "https://leetcode.com/problems/alien-dictionary/", difficulty: "Hard", category: "Graphs" }, // Topological Sort (Premium)
-            { id: "text-justification", name: "Text Justification", link: "https://leetcode.com/problems/text-justification/", difficulty: "Hard", category: "Strings" }, // Greedy
-            { id: "wildcard-matching", name: "Wildcard Matching", link: "https://leetcode.com/problems/wildcard-matching/", difficulty: "Hard", category: "DP" }, // Strings
-            { id: "n-queens", name: "N-Queens", link: "https://leetcode.com/problems/n-queens/", difficulty: "Hard", category: "Backtracking" },
-            { id: "sudoku-solver", name: "Sudoku Solver", link: "https://leetcode.com/problems/sudoku-solver/", difficulty: "Hard", category: "Backtracking" }, // Matrix
-            { id: "reverse-nodes-in-k-group", name: "Reverse Nodes in k-Group", link: "https://leetcode.com/problems/reverse-nodes-in-k-group/", difficulty: "Hard", category: "Linked List" },
-            { id: "integer-to-english-words", name: "Integer to English Words", link: "https://leetcode.com/problems/integer-to-english-words/", difficulty: "Hard", category: "Strings" }, // Math
-            { id: "substring-with-concatenation-of-all-words", name: "Substring with Concatenation of All Words", link: "https://leetcode.com/problems/substring-with-concatenation-of-all-words/", difficulty: "Hard", category: "Sliding Window" }, // Strings, Hash Table
-            { id: "candy", name: "Candy", link: "https://leetcode.com/problems/candy/", difficulty: "Hard", category: "Greedy" }, // Arrays
-            { id: "maximal-rectangle", name: "Maximal Rectangle", link: "https://leetcode.com/problems/maximal-rectangle/", difficulty: "Hard", category: "DP" } // Matrix, Stack (similar to Largest Rectangle in Histogram)
+            { id: "merge-k-sorted-lists", name: "Merge k Sorted Lists", link: "https://leetcode.com/problems/merge-k-sorted-lists/", difficulty: "Hard", category: "Heap", companies: ["Amazon", "Google", "Meta", "Microsoft"] },
+            { id: "median-of-two-sorted-arrays", name: "Median of Two Sorted Arrays", link: "https://leetcode.com/problems/median-of-two-sorted-arrays/", difficulty: "Hard", category: "Searching", companies: ["Google", "Amazon", "Microsoft", "Apple", "Adobe"] },
+            { id: "trapping-rain-water", name: "Trapping Rain Water", link: "https://leetcode.com/problems/trapping-rain-water/", difficulty: "Hard", category: "Arrays", companies: ["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"] },
+            { id: "largest-rectangle-in-histogram", name: "Largest Rectangle in Histogram", link: "https://leetcode.com/problems/largest-rectangle-in-histogram/", difficulty: "Hard", category: "Stack", companies: ["Amazon", "Google", "Microsoft"] },
+            { id: "word-ladder", name: "Word Ladder", link: "https://leetcode.com/problems/word-ladder/", difficulty: "Hard", category: "Graphs", companies: ["Amazon", "Google", "Meta", "LinkedIn"] },
+            { id: "basic-calculator", name: "Basic Calculator", link: "https://leetcode.com/problems/basic-calculator/", difficulty: "Hard", category: "Stack", companies: ["Google", "Microsoft", "Amazon"] },
+            { id: "regular-expression-matching", name: "Regular Expression Matching", link: "https://leetcode.com/problems/regular-expression-matching/", difficulty: "Hard", category: "DP", companies: ["Google", "Meta", "Amazon", "Microsoft", "Airbnb"] },
+            { id: "lru-cache", name: "LRU Cache", link: "https://leetcode.com/problems/lru-cache/", difficulty: "Hard", category: "Design", companies: ["Amazon", "Google", "Meta", "Microsoft", "Bloomberg"] },
+            { id: "find-median-from-data-stream", name: "Find Median from Data Stream", link: "https://leetcode.com/problems/find-median-from-data-stream/", difficulty: "Hard", category: "Heap", companies: ["Amazon", "Google", "Meta", "Microsoft", "Apple"] },
+            { id: "sliding-window-maximum", name: "Sliding Window Maximum", link: "https://leetcode.com/problems/sliding-window-maximum/", difficulty: "Hard", category: "Sliding Window", companies: ["Amazon", "Google", "Microsoft", "Uber"] },
+            { id: "binary-tree-maximum-path-sum", name: "Binary Tree Maximum Path Sum", link: "https://leetcode.com/problems/binary-tree-maximum-path-sum/", difficulty: "Hard", category: "Trees", companies: ["Google", "Amazon", "Meta", "Microsoft"] },
+            { id: "edit-distance", name: "Edit Distance", link: "https://leetcode.com/problems/edit-distance/", difficulty: "Hard", category: "DP", companies: ["Google", "Microsoft", "Amazon", "Snapchat"] },
+            { id: "critical-connections-in-a-network", name: "Critical Connections in a Network", link: "https://leetcode.com/problems/critical-connections-in-a-network/", difficulty: "Hard", category: "Graphs", companies: ["Amazon", "Google"] },
+            { id: "minimum-window-substring", name: "Minimum Window Substring", link: "https://leetcode.com/problems/minimum-window-substring/", difficulty: "Hard", category: "Sliding Window", companies: ["Amazon", "Meta", "Microsoft", "LinkedIn", "Uber"] },
+            { id: "word-search-ii", name: "Word Search II", link: "https://leetcode.com/problems/word-search-ii/", difficulty: "Hard", category: "Trie", companies: ["Amazon", "Google", "Microsoft", "Airbnb"] },
+            { id: "alien-dictionary", name: "Alien Dictionary", link: "https://leetcode.com/problems/alien-dictionary/", difficulty: "Hard", category: "Graphs", companies: ["Google", "Meta", "Amazon", "Airbnb", "Twitter"] },
+            { id: "text-justification", name: "Text Justification", link: "https://leetcode.com/problems/text-justification/", difficulty: "Hard", category: "Strings", companies: ["Meta", "Google", "LinkedIn", "Microsoft"] },
+            { id: "wildcard-matching", name: "Wildcard Matching", link: "https://leetcode.com/problems/wildcard-matching/", difficulty: "Hard", category: "DP", companies: ["Google", "Amazon", "Meta", "Microsoft"] },
+            { id: "n-queens", name: "N-Queens", link: "https://leetcode.com/problems/n-queens/", difficulty: "Hard", category: "Backtracking", companies: ["Amazon", "Microsoft", "Google"] },
+            { id: "sudoku-solver", name: "Sudoku Solver", link: "https://leetcode.com/problems/sudoku-solver/", difficulty: "Hard", category: "Backtracking", companies: ["Amazon", "Microsoft", "Google", "Meta"] },
+            { id: "reverse-nodes-in-k-group", name: "Reverse Nodes in k-Group", link: "https://leetcode.com/problems/reverse-nodes-in-k-group/", difficulty: "Hard", category: "Linked List", companies: ["Amazon", "Microsoft", "Google", "Meta"] },
+            { id: "integer-to-english-words", name: "Integer to English Words", link: "https://leetcode.com/problems/integer-to-english-words/", difficulty: "Hard", category: "Strings", companies: ["Amazon", "Microsoft", "Meta"] },
+            { id: "substring-with-concatenation-of-all-words", name: "Substring with Concatenation of All Words", link: "https://leetcode.com/problems/substring-with-concatenation-of-all-words/", difficulty: "Hard", category: "Sliding Window", companies: ["Google", "Amazon", "Meta"] },
+            { id: "candy", name: "Candy", link: "https://leetcode.com/problems/candy/", difficulty: "Hard", category: "Greedy", companies: ["Google", "Amazon", "Meta"] },
+            { id: "maximal-rectangle", name: "Maximal Rectangle", link: "https://leetcode.com/problems/maximal-rectangle/", difficulty: "Hard", category: "DP", companies: ["Amazon", "Google", "Microsoft"] }
         ];
-
-        const PROGRESS_STORAGE_KEY = 'codingRoadmapProgress';
+        const PROGRESS_STORAGE_KEY = 'codingRoadmapProgress'; // Stores { qId: { checked: bool, startTime: timestamp|null, timeTaken: seconds|null } }
 
         // --- DOM Elements ---
         let easyList, mediumList, hardList;
         let easyCountEl, mediumCountEl, hardCountEl;
         let categoryFilterEl;
         let clearProgressBtn;
+        let overallProgressBarEl, overallProgressTextEl;
 
 
-        // --- Local Storage Functions ---
-        function getProgress() {
-            const progress = localStorage.getItem(PROGRESS_STORAGE_KEY);
-            return progress ? JSON.parse(progress) : {};
+        // --- Local Storage & Progress Data Functions ---
+        function getQuestionProgress(questionId) {
+            const allProgress = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || '{}');
+            return allProgress[questionId] || { checked: false, startTime: null, timeTaken: null };
         }
 
-        function saveProgress(questionId, isChecked) {
-            const progress = getProgress();
-            progress[questionId] = isChecked;
-            localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(progress));
+        function saveQuestionProgress(questionId, data) {
+            const allProgress = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || '{}');
+            allProgress[questionId] = { ... (allProgress[questionId] || {}), ...data };
+            localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(allProgress));
+            updateOverallProgress();
         }
         
         function clearAllProgress() {
-            if (confirm("Are you sure you want to clear all your progress? This action cannot be undone.")) {
+            const confirmed = window.confirm("Are you sure you want to clear all your progress? This action cannot be undone.");
+            if (confirmed) {
                 localStorage.removeItem(PROGRESS_STORAGE_KEY);
-                renderQuestions(categoryFilterEl.value); // Re-render to reflect cleared checkboxes
+                renderQuestions(categoryFilterEl.value); 
+                updateOverallProgress();
             }
         }
 
+        // --- Timer Functions ---
+        function startTimer(questionId, questionLinkElement) {
+            const currentQProgress = getQuestionProgress(questionId);
+            // Only start timer if not already completed and not already timing
+            if (!currentQProgress.checked && !currentQProgress.startTime) {
+                saveQuestionProgress(questionId, { startTime: Date.now(), timeTaken: null }); // Reset timeTaken if re-timing
+                renderSingleQuestion(questionId); // Re-render this specific question item
+            }
+            // Allow navigation to LeetCode even if timer starts or is already running
+            return true; 
+        }
+
+        function stopTimer(questionId) {
+            const currentQProgress = getQuestionProgress(questionId);
+            if (currentQProgress.startTime) { // Only stop if it was timing
+                const timeTakenSeconds = Math.round((Date.now() - currentQProgress.startTime) / 1000);
+                saveQuestionProgress(questionId, { startTime: null, timeTaken: timeTakenSeconds, checked: true });
+                return timeTakenSeconds;
+            }
+            return null; // Return null if timer wasn't active
+        }
+
+        function formatTime(totalSeconds) {
+            if (totalSeconds === null || totalSeconds === undefined) return '';
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${minutes}m ${seconds}s`;
+        }
+
+
+        // --- Celebration Animation ---
+        function triggerCelebration(checkboxElement) {
+            const rect = checkboxElement.getBoundingClientRect();
+            const celebrationX = rect.left + rect.width / 2 + window.scrollX;
+            const celebrationY = rect.top + rect.height / 2 + window.scrollY;
+            const numParticles = 20; 
+            const colors = ['#facc15', '#fb923c', '#4ade80', '#60a5fa', '#f472b6', '#a78bfa', '#ec4899', '#34d399'];
+
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('celebration-particle');
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                particle.style.left = `${celebrationX - 5}px`; 
+                particle.style.top = `${celebrationY - 5}px`;  
+
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 150 + 50; // Increased burst radius: 50px to 200px
+                const tx = Math.cos(angle * Math.PI / 180) * distance;
+                const ty = Math.sin(angle * Math.PI / 180) * distance;
+                
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+
+                document.body.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) { 
+                        particle.remove();
+                    }
+                }, 1200); // Matches animation duration in CSS (or slightly longer)
+            }
+        }
+
+
+        // --- Progress Tracker Functions ---
+        function updateOverallProgress() {
+            const allProgress = JSON.parse(localStorage.getItem(PROGRESS_STORAGE_KEY) || '{}');
+            const totalQuestions = questions.length;
+            let completedCount = 0;
+            for (const qId in allProgress) {
+                if (allProgress[qId] && allProgress[qId].checked) {
+                    completedCount++;
+                }
+            }
+
+            const percentage = totalQuestions > 0 ? Math.round((completedCount / totalQuestions) * 100) : 0;
+            
+            overallProgressBarEl.style.width = `${percentage}%`;
+            overallProgressBarEl.textContent = `${percentage}%`;
+            overallProgressTextEl.textContent = `${completedCount}/${totalQuestions} Questions Completed`;
+
+            if (percentage < 25) overallProgressBarEl.style.backgroundColor = '#ef4444'; 
+            else if (percentage < 50) overallProgressBarEl.style.backgroundColor = '#f97316'; 
+            else if (percentage < 75) overallProgressBarEl.style.backgroundColor = '#eab308'; 
+            else if (percentage < 100) overallProgressBarEl.style.backgroundColor = '#22c55e'; 
+            else overallProgressBarEl.style.backgroundColor = '#10b981'; 
+            
+            if (percentage === 100) overallProgressBarEl.textContent = `🎉 ${percentage}% Complete! 🎉`;
+        }
 
         // --- Rendering Functions ---
         function populateFilters() {
@@ -266,9 +429,108 @@
                 categoryFilterEl.appendChild(option);
             });
         }
+        
+        function createQuestionListItemHTML(question) {
+            const qProgress = getQuestionProgress(question.id);
+            const displayName = question.name.length > 30 ? question.name.substring(0, 27) + "..." : question.name; 
+            
+            let companyTagsHTML = '';
+            if (question.companies && question.companies.length > 0) {
+                companyTagsHTML = `<div class="mt-1.5 flex flex-wrap">` + question.companies.slice(0, 3).map(company => `<span class="company-tag">${company}</span>`).join('') + 
+                                  (question.companies.length > 3 ? `<span class="company-tag text-xs">+${question.companies.length - 3} more</span>` : '') +
+                                  `</div>`;
+            }
+
+            let timerHTML = '';
+            if (qProgress.startTime) {
+                timerHTML = `<div class="timer-display timer-active">Timing...</div>`;
+            } else if (qProgress.checked && qProgress.timeTaken !== null) {
+                timerHTML = `<div class="timer-display">Completed in: ${formatTime(qProgress.timeTaken)}</div>`;
+            }
+
+
+            return `
+                <div class="flex items-start">
+                    <input type="checkbox" id="checkbox-${question.id}" data-question-id="${question.id}" class="custom-checkbox mt-1" ${qProgress.checked ? 'checked' : ''}>
+                    <div class="flex-grow ml-2">
+                        <a href="${question.link}" target="_blank" rel="noopener noreferrer" data-question-id-link="${question.id}" class="flex justify-between items-center text-sm sm:text-base">
+                            <span class="text-gray-200 hover:text-blue-400 font-medium">${displayName}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                        </a>
+                        ${companyTagsHTML}
+                        ${timerHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSingleQuestion(questionId) {
+            const question = questions.find(q => q.id === questionId);
+            if (!question) return;
+
+            const listItemElement = document.querySelector(`li[data-question-id-item="${questionId}"]`);
+            if (listItemElement) {
+                listItemElement.innerHTML = createQuestionListItemHTML(question);
+                // Re-attach event listeners for this specific item
+                attachEventListenersToListItem(listItemElement, question);
+            }
+        }
+        
+        function attachEventListenersToListItem(listItem, question) {
+            const checkbox = listItem.querySelector(`#checkbox-${question.id}`);
+            const questionLink = listItem.querySelector(`a[data-question-id-link="${question.id}"]`);
+
+            checkbox.addEventListener('change', (e) => {
+                // e.stopPropagation(); // Not strictly needed here for 'change' unless other 'change' listeners bubble
+                const questionId = e.target.dataset.questionId;
+                const isNowChecked = e.target.checked;
+                const qProgress = getQuestionProgress(questionId); 
+
+                if (isNowChecked) {
+                    const timeTaken = stopTimer(questionId); 
+                    if (timeTaken !== null && !qProgress.checked) { 
+                         triggerCelebration(e.target);
+                    } else if (!qProgress.checked) { 
+                        saveQuestionProgress(questionId, { checked: true }); // Save check state if no timer was running
+                        triggerCelebration(e.target);
+                    } else { 
+                        saveQuestionProgress(questionId, { checked: true }); 
+                    }
+                } else { 
+                    saveQuestionProgress(questionId, { checked: false, startTime: null, timeTaken: null });
+                }
+                renderSingleQuestion(questionId); 
+            });
+            
+            if (questionLink) {
+                questionLink.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent click from bubbling to listItem's click listener
+                    startTimer(question.id, questionLink);
+                    // Allow default navigation
+                });
+            }
+
+            listItem.addEventListener('click', (e) => {
+                // If the click target is the checkbox itself, its own 'change' event handles it.
+                if (e.target === checkbox) {
+                    return;
+                }
+                // If the click target is the link or inside the link, it's handled by the link's listener (which stops propagation).
+                // This check is a safeguard.
+                if (questionLink && (e.target === questionLink || questionLink.contains(e.target))) {
+                    return;
+                }
+                // If the click was elsewhere on the list item, then toggle the checkbox.
+                checkbox.checked = !checkbox.checked;
+                const changeEvent = new Event('change', { bubbles: true });
+                checkbox.dispatchEvent(changeEvent);
+            });
+        }
+
 
         function renderQuestions(filterCategory = 'All') {
-            // Clear existing lists
             easyList.innerHTML = '';
             mediumList.innerHTML = '';
             hardList.innerHTML = '';
@@ -277,45 +539,17 @@
             let mediumCounter = 0;
             let hardCounter = 0;
 
-            const currentProgress = getProgress();
-
             questions.forEach(question => {
                 if (filterCategory !== 'All' && question.category !== filterCategory) {
-                    return; // Skip if not matching the filter
+                    return; 
                 }
 
                 const listItem = document.createElement('li');
-                listItem.className = 'bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-all duration-200 ease-in-out';
+                listItem.className = 'bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-all duration-200 ease-in-out'; // Removed cursor-pointer from li, will be on specific elements
+                listItem.setAttribute('data-question-id-item', question.id); 
+                listItem.innerHTML = createQuestionListItemHTML(question);
                 
-                const displayName = question.name.length > 35 ? question.name.substring(0, 32) + "..." : question.name; // Adjusted length
-
-                const isChecked = currentProgress[question.id] || false;
-
-                listItem.innerHTML = `
-                    <label for="checkbox-${question.id}" class="flex items-center cursor-pointer w-full">
-                        <input type="checkbox" id="checkbox-${question.id}" data-question-id="${question.id}" class="custom-checkbox" ${isChecked ? 'checked' : ''}>
-                        <a href="${question.link}" target="_blank" rel="noopener noreferrer" class="flex-grow flex justify-between items-center text-sm sm:text-base ml-2" onclick="event.stopPropagation();">
-                            <span class="text-gray-200 hover:text-blue-400">${displayName}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 group-hover:text-blue-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-                    </label>
-                `;
-
-                // Add event listener for the checkbox
-                const checkbox = listItem.querySelector(`#checkbox-${question.id}`);
-                checkbox.addEventListener('change', (e) => {
-                    saveProgress(e.target.dataset.questionId, e.target.checked);
-                });
-                
-                // Prevent link click when checkbox/label is clicked for better UX
-                listItem.querySelector('label').addEventListener('click', (e) => {
-                    if (e.target.tagName !== 'A' && e.target.tagName !== 'svg' && e.target.tagName !== 'PATH') {
-                         // Allow click to toggle checkbox
-                    }
-                });
-
+                attachEventListenersToListItem(listItem, question);
 
                 if (question.difficulty === 'Easy') {
                     easyList.appendChild(listItem);
@@ -336,7 +570,6 @@
 
         // --- Event Listeners & Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Assign DOM elements
             easyList = document.getElementById('easy-questions-list');
             mediumList = document.getElementById('medium-questions-list');
             hardList = document.getElementById('hard-questions-list');
@@ -345,10 +578,12 @@
             hardCountEl = document.getElementById('hard-count');
             categoryFilterEl = document.getElementById('category-filter');
             clearProgressBtn = document.getElementById('clear-progress-btn');
-
+            overallProgressBarEl = document.getElementById('overall-progress-bar');
+            overallProgressTextEl = document.getElementById('overall-progress-text');
 
             populateFilters();
-            renderQuestions(); // Initial render with all questions
+            renderQuestions(); 
+            updateOverallProgress(); 
 
             categoryFilterEl.addEventListener('change', (e) => {
                 renderQuestions(e.target.value);
